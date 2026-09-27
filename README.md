@@ -15,7 +15,7 @@
 To use `matrix-org-notify`, you need:
 
 1. A Matrix homeserver URL (default: `https://matrix-client.matrix.org`).
-1. A target Matrix Room ID (e.g. `!abcdefgh:matrix.org`).
+1. A target Matrix Room ID, exactly as given by your homeserver (e.g. `!k0_TCUEmo5lIZChur5RovqVqrc2hlZ7GDV9Q5uSGI_Y`). Depending on the homeserver and room version, it may or may not include a `:server_name` suffix (e.g. `!abcdefgh:matrix.org`) — do not append one yourself.
 1. An Access Token from an account joined to that room (e.g. a dedicated bot account).
 
 > [!IMPORTANT]
@@ -33,7 +33,7 @@ Example content:
 ```json
 {
   "homeserver": "https://matrix-client.matrix.org",
-  "room_id": "!your_room_id:matrix.org",
+  "room_id": "!your_room_id",
   "access_token": "syt_your_access_token_here"
 }
 ```

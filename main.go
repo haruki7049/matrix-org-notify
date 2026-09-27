@@ -30,9 +30,14 @@ environment variables. See README.md for details.
 Example config.json:
   {
     "homeserver": "https://matrix-client.matrix.org",
-    "room_id": "!your_room_id:matrix.org",
+    "room_id": "!your_room_id",
     "access_token": "syt_your_access_token_here"
   }
+
+room_id is the exact Matrix room ID (starting with "!") as returned by
+your homeserver, e.g. via a client's room settings. Depending on the
+homeserver and room version, it may or may not include a ":server_name"
+suffix; use it exactly as given, do not append one yourself.
 
 Flags:
 `
