@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -57,8 +58,15 @@ func sendMessage(client *http.Client, cfg config, message string) error {
 	return nil
 }
 
+// txnCounter is combined with a timestamp in transactionID to guarantee
+// uniqueness even when called twice within the same clock tick: some
+// platforms (observed on macOS CI runners) have a coarser time.Now()
+// resolution than a nanosecond.
+var txnCounter atomic.Uint64
+
 // transactionID returns a value that is unique per call, suitable for use
 // as a Matrix Client-Server API transaction ID.
 func transactionID() string {
-	return strconv.FormatInt(time.Now().UnixNano(), 10)
+	n := txnCounter.Add(1)
+	return strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + strconv.FormatUint(n, 10)
 }
