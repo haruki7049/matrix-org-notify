@@ -37,6 +37,13 @@ config file (~/.config/matrix-org-notify/config.json on Linux/macOS,
 with the MATRIX_HOMESERVER, MATRIX_ROOM_ID, and MATRIX_ACCESS_TOKEN
 environment variables. See README.md for details.
 
+Example config.json:
+  {
+    "homeserver": "https://matrix-client.matrix.org",
+    "room_id": "!your_room_id:matrix.org",
+    "access_token": "syt_your_access_token_here"
+  }
+
 Flags:
 `
 
