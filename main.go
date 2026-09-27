@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
@@ -32,11 +31,11 @@ Usage:
 The message is taken from the command-line arguments, or from stdin when
 no arguments are given.
 
-Configuration (Homeserver, Room ID, Access Token) is read from a config
-file (~/.config/matrix-org-notify/config on Linux/macOS,
-%APPDATA%\matrix-org-notify\config on Windows) and can be overridden with the
-MATRIX_HOMESERVER, MATRIX_ROOM_ID, and MATRIX_ACCESS_TOKEN environment
-variables. See README.md for details.
+Configuration (Homeserver, Room ID, Access Token) is read from a JSON
+config file (~/.config/matrix-org-notify/config.json on Linux/macOS,
+%APPDATA%\matrix-org-notify\config.json on Windows) and can be overridden
+with the MATRIX_HOMESERVER, MATRIX_ROOM_ID, and MATRIX_ACCESS_TOKEN
+environment variables. See README.md for details.
 
 Flags:
 `
@@ -111,43 +110,46 @@ func readMessage(args []string, stdin io.Reader) (string, error) {
 }
 
 // configFilePath returns the path to the config file, following the
-// convention documented in README.md: ~/.config/matrix-org-notify/config on
-// Linux/macOS, and %APPDATA%\matrix-org-notify\config on Windows.
+// convention documented in README.md: ~/.config/matrix-org-notify/config.json
+// on Linux/macOS, and %APPDATA%\matrix-org-notify\config.json on Windows.
 func configFilePath() string {
 	if runtime.GOOS == "windows" {
 		appData := os.Getenv("APPDATA")
 		if appData == "" {
 			return ""
 		}
-		return filepath.Join(appData, "matrix-org-notify", "config")
+		return filepath.Join(appData, "matrix-org-notify", "config.json")
 	}
 
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, ".config", "matrix-org-notify", "config")
+	return filepath.Join(home, ".config", "matrix-org-notify", "config.json")
 }
 
-// loadConfig reads the config file (if present) and applies environment
-// variable overrides on top of it.
+// configFile mirrors the JSON config file schema documented in README.md.
+type configFile struct {
+	Homeserver  string `json:"homeserver"`
+	RoomID      string `json:"room_id"`
+	AccessToken string `json:"access_token"`
+}
+
+// loadConfig reads the JSON config file (if present) and applies
+// environment variable overrides on top of it.
 func loadConfig(path string, getenv func(string) string) (config, error) {
 	cfg := config{Homeserver: defaultHomeserver}
 
 	if path != "" {
-		values, err := parseConfigFile(path)
+		file, err := parseConfigFile(path)
 		if err != nil {
 			return config{}, err
 		}
-		if v, ok := values["HOMESERVER"]; ok && v != "" {
-			cfg.Homeserver = v
+		if file.Homeserver != "" {
+			cfg.Homeserver = file.Homeserver
 		}
-		if v, ok := values["ROOM_ID"]; ok {
-			cfg.RoomID = v
-		}
-		if v, ok := values["ACCESS_TOKEN"]; ok {
-			cfg.AccessToken = v
-		}
+		cfg.RoomID = file.RoomID
+		cfg.AccessToken = file.AccessToken
 	}
 
 	if v := getenv("MATRIX_HOMESERVER"); v != "" {
@@ -163,44 +165,24 @@ func loadConfig(path string, getenv func(string) string) (config, error) {
 	return cfg, nil
 }
 
-// parseConfigFile parses a shell-style KEY="VALUE" / KEY=VALUE config file.
-// Blank lines and lines starting with '#' are ignored. A missing file is not
-// an error, as configuration may be supplied entirely via environment
+// parseConfigFile parses the JSON config file. A missing file is not an
+// error, as configuration may be supplied entirely via environment
 // variables.
-func parseConfigFile(path string) (map[string]string, error) {
-	values := make(map[string]string)
-
-	f, err := os.Open(path)
+func parseConfigFile(path string) (configFile, error) {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return values, nil
+			return configFile{}, nil
 		}
-		return nil, fmt.Errorf("opening config file: %w", err)
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		key, value, found := strings.Cut(line, "=")
-		if !found {
-			continue
-		}
-
-		key = strings.TrimSpace(key)
-		value = strings.TrimSpace(value)
-		value = strings.Trim(value, `"'`)
-		values[key] = value
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("reading config file: %w", err)
+		return configFile{}, fmt.Errorf("opening config file: %w", err)
 	}
 
-	return values, nil
+	var file configFile
+	if err := json.Unmarshal(data, &file); err != nil {
+		return configFile{}, fmt.Errorf("parsing config file: %w", err)
+	}
+
+	return file, nil
 }
 
 type sendMessageRequest struct {
