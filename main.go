@@ -33,8 +33,8 @@ The message is taken from the command-line arguments, or from stdin when
 no arguments are given.
 
 Configuration (Homeserver, Room ID, Access Token) is read from a config
-file (~/.config/matrix-notify/config on Linux/macOS,
-%APPDATA%\matrix-notify\config on Windows) and can be overridden with the
+file (~/.config/matrix-org-notify/config on Linux/macOS,
+%APPDATA%\matrix-org-notify\config on Windows) and can be overridden with the
 MATRIX_HOMESERVER, MATRIX_ROOM_ID, and MATRIX_ACCESS_TOKEN environment
 variables. See README.md for details.
 
@@ -111,22 +111,22 @@ func readMessage(args []string, stdin io.Reader) (string, error) {
 }
 
 // configFilePath returns the path to the config file, following the
-// convention documented in README.md: ~/.config/matrix-notify/config on
-// Linux/macOS, and %APPDATA%\matrix-notify\config on Windows.
+// convention documented in README.md: ~/.config/matrix-org-notify/config on
+// Linux/macOS, and %APPDATA%\matrix-org-notify\config on Windows.
 func configFilePath() string {
 	if runtime.GOOS == "windows" {
 		appData := os.Getenv("APPDATA")
 		if appData == "" {
 			return ""
 		}
-		return filepath.Join(appData, "matrix-notify", "config")
+		return filepath.Join(appData, "matrix-org-notify", "config")
 	}
 
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, ".config", "matrix-notify", "config")
+	return filepath.Join(home, ".config", "matrix-org-notify", "config")
 }
 
 // loadConfig reads the config file (if present) and applies environment
