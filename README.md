@@ -25,8 +25,8 @@ To use `matrix-org-notify`, you need:
 
 Create a configuration file in your user config directory:
 
-- **Linux / macOS**: `~/.config/matrix-notify/config`
-- **Windows**: `%APPDATA%\matrix-notify\config`
+- **Linux / macOS**: `~/.config/matrix-org-notify/config`
+- **Windows**: `%APPDATA%\matrix-org-notify\config`
 
 Example content:
 
@@ -39,7 +39,7 @@ ACCESS_TOKEN="syt_your_access_token_here"
 Restrict permissions on the file to prevent unauthorized access:
 
 ```bash
-chmod 600 ~/.config/matrix-notify/config
+chmod 600 ~/.config/matrix-org-notify/config
 ```
 
 ### Environment Variables (Optional)
