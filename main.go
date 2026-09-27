@@ -22,6 +22,25 @@ type config struct {
 	AccessToken string
 }
 
+const usage = `matrix-org-notify sends a notification message to a Matrix room.
+
+Usage:
+  matrix-org-notify [message...]
+  echo "message" | matrix-org-notify
+
+The message is taken from the command-line arguments, or from stdin when
+no arguments are given.
+
+Configuration (Homeserver, Room ID, Access Token) is read from a config
+file (~/.config/matrix-notify/config on Linux/macOS,
+%APPDATA%\matrix-notify\config on Windows) and can be overridden with the
+MATRIX_HOMESERVER, MATRIX_ROOM_ID, and MATRIX_ACCESS_TOKEN environment
+variables. See README.md for details.
+
+Flags:
+  -h, --help  Show this help message and exit.
+`
+
 func main() {
 	if err := run(os.Args[1:], os.Stdin, os.Stdout); err != nil {
 		fmt.Fprintln(os.Stderr, "matrix-org-notify:", err)
@@ -30,6 +49,11 @@ func main() {
 }
 
 func run(args []string, stdin io.Reader, stdout io.Writer) error {
+	if hasHelpFlag(args) {
+		fmt.Fprint(stdout, usage)
+		return nil
+	}
+
 	message, err := readMessage(args, stdin)
 	if err != nil {
 		return err
@@ -55,6 +79,16 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 
 	fmt.Fprintln(stdout, "notification sent")
 	return nil
+}
+
+// hasHelpFlag reports whether any argument requests the help message.
+func hasHelpFlag(args []string) bool {
+	for _, arg := range args {
+		if arg == "-h" || arg == "--help" {
+			return true
+		}
+	}
+	return false
 }
 
 // readMessage returns the message from CLI arguments, falling back to stdin

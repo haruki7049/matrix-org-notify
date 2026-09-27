@@ -182,3 +182,15 @@ func TestRunNoMessage(t *testing.T) {
 		t.Fatal("expected an error when no message is provided")
 	}
 }
+
+func TestRunHelp(t *testing.T) {
+	for _, flag := range []string{"-h", "--help"} {
+		var out bytes.Buffer
+		if err := run([]string{flag}, strings.NewReader(""), &out); err != nil {
+			t.Fatalf("unexpected error for %q: %v", flag, err)
+		}
+		if !strings.Contains(out.String(), "Usage:") {
+			t.Errorf("output for %q = %q, want it to contain usage text", flag, out.String())
+		}
+	}
+}
