@@ -23,9 +23,10 @@ no arguments are given.
 
 Configuration (Homeserver, Room ID, Access Token) is read from a JSON
 config file (~/.config/matrix-org-notify/config.json on Linux/macOS,
-%APPDATA%\matrix-org-notify\config.json on Windows) and can be overridden
-with the MATRIX_HOMESERVER, MATRIX_ROOM_ID, and MATRIX_ACCESS_TOKEN
-environment variables. See README.md for details.
+%APPDATA%\matrix-org-notify\config.json on Windows, or the path given by
+-c/--config) and can be overridden with the MATRIX_HOMESERVER,
+MATRIX_ROOM_ID, and MATRIX_ACCESS_TOKEN environment variables. See
+README.md for details.
 
 Example config.json:
   {
@@ -55,6 +56,12 @@ func main() {
 func run(args []string, stdin io.Reader, stdout io.Writer) error {
 	fs := flag.NewFlagSet("matrix-org-notify", flag.ContinueOnError)
 	fs.SetOutput(stdout)
+
+	var configPath string
+	const configUsage = "path to the JSON config file (default: OS-specific path, see --help)"
+	fs.StringVar(&configPath, "config", "", configUsage)
+	fs.StringVar(&configPath, "c", "", configUsage+" (shorthand)")
+
 	fs.Usage = func() {
 		fmt.Fprint(fs.Output(), usageHeader)
 		fs.PrintDefaults()
@@ -71,7 +78,10 @@ func run(args []string, stdin io.Reader, stdout io.Writer) error {
 		return errors.New("no message provided (pass it as an argument or via stdin)")
 	}
 
-	cfg, err := loadConfig(configFilePath(), os.Getenv)
+	if configPath == "" {
+		configPath = configFilePath()
+	}
+	cfg, err := loadConfig(configPath, os.Getenv)
 	if err != nil {
 		return err
 	}
