@@ -44,6 +44,13 @@ Restrict permissions on the file to prevent unauthorized access:
 chmod 600 ~/.config/matrix-org-notify/config.json
 ```
 
+To use a config file at a different location instead of the default
+path, pass `-c`/`--config`:
+
+```bash
+matrix-org-notify -c /path/to/another-config.json "Build finished successfully!"
+```
+
 ### Environment Variables (Optional)
 
 You can also configure or override settings via environment variables:
