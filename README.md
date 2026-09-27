@@ -13,9 +13,10 @@
 ## Setup & Configuration
 
 To use `matrix-org-notify`, you need:
+
 1. A Matrix homeserver URL (default: `https://matrix-client.matrix.org`).
-2. A target Matrix Room ID (e.g. `!abcdefgh:matrix.org`).
-3. An Access Token from an account joined to that room (e.g. a dedicated bot account).
+1. A target Matrix Room ID (e.g. `!abcdefgh:matrix.org`).
+1. An Access Token from an account joined to that room (e.g. a dedicated bot account).
 
 > [!IMPORTANT]
 > The target Matrix room should have **End-to-End Encryption (E2EE) disabled**, as this lightweight tool talks directly to the standard Matrix Client-Server HTTP API without heavy encryption client dependencies.
