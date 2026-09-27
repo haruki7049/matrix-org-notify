@@ -72,6 +72,27 @@ Run directly without cloning or building manually:
 nix run github:haruki7049/matrix-org-notify -- "Hello from Nix!"
 ```
 
+### Protecting the Access Token from Claude Code Itself
+
+If you use `matrix-org-notify` from a Claude Code hook (see below), prefer the **config file** over the `MATRIX_ACCESS_TOKEN` environment variable for that use case. An environment variable set in the shell Claude Code runs in can be read back by the agent itself (e.g. by running `env`), since Claude Code's `Bash` tool shares that same environment. A value that only lives in `~/.config/matrix-org-notify/config.json` is not exposed this way — only the `matrix-org-notify` binary reads it.
+
+This is not a hard guarantee: an agent with unrestricted `Bash` access can still read the file directly (`cat`, `head`, a script that opens it, etc.). As defense in depth, you can add deny rules to `~/.claude/settings.json` to keep Claude Code from touching the file or dumping the environment:
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Read(~/.config/matrix-org-notify/**)",
+      "Bash(env)",
+      "Bash(printenv)",
+      "Bash(cat ~/.config/matrix-org-notify/config.json)"
+    ]
+  }
+}
+```
+
+Treat this as a speed bump, not a security boundary: `Bash` deny rules match specific command text and can be bypassed by an absolute path, a different shell wrapper, or another program that reads the file (`less`, `python -c "..."`, etc.). The `chmod 600` step above (OS-level file permissions) is the actual enforcement; the deny rules just make an accidental or casual read less likely.
+
 ## Claude Code Integration
 
 You can configure Claude Code to notify you on Matrix when a task completes or when it waits for your input or tool permission by adding hooks to `~/.claude/settings.json`:
