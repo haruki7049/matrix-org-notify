@@ -1,0 +1,38 @@
+name: Go
+
+on:
+  push:
+
+jobs:
+  ci-on-Unix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31.6.0
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Run go build/test/vet
+        run: nix develop --print-build-logs --command sh -c 'go build ./... && go test ./... && go vet ./...'
+
+  ci-on-Windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+      - name: Setup Go
+        uses: actions/setup-go@v6.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Run go build
+        run: go build ./...
+      - name: Run go test
+        run: go test ./...
+      - name: Run go vet
+        run: go vet ./...
