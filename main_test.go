@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"flag"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -184,13 +186,14 @@ func TestRunNoMessage(t *testing.T) {
 }
 
 func TestRunHelp(t *testing.T) {
-	for _, flag := range []string{"-h", "--help"} {
+	for _, name := range []string{"-h", "--help"} {
 		var out bytes.Buffer
-		if err := run([]string{flag}, strings.NewReader(""), &out); err != nil {
-			t.Fatalf("unexpected error for %q: %v", flag, err)
+		err := run([]string{name}, strings.NewReader(""), &out)
+		if !errors.Is(err, flag.ErrHelp) {
+			t.Fatalf("err for %q = %v, want flag.ErrHelp", name, err)
 		}
 		if !strings.Contains(out.String(), "Usage:") {
-			t.Errorf("output for %q = %q, want it to contain usage text", flag, out.String())
+			t.Errorf("output for %q = %q, want it to contain usage text", name, out.String())
 		}
 	}
 }
