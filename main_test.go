@@ -37,52 +37,49 @@ func TestReadMessage(t *testing.T) {
 
 func TestParseConfigFile(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "config")
-	content := `
-# comment line
-HOMESERVER="https://example.org"
-ROOM_ID='!room:example.org'
-ACCESS_TOKEN=plain-token
-`
+	path := filepath.Join(dir, "config.json")
+	content := `{
+  "homeserver": "https://example.org",
+  "room_id": "!room:example.org",
+  "access_token": "plain-token"
+}`
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatalf("writing config file: %v", err)
 	}
 
-	values, err := parseConfigFile(path)
+	got, err := parseConfigFile(path)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	want := map[string]string{
-		"HOMESERVER":   "https://example.org",
-		"ROOM_ID":      "!room:example.org",
-		"ACCESS_TOKEN": "plain-token",
+	want := configFile{
+		Homeserver:  "https://example.org",
+		RoomID:      "!room:example.org",
+		AccessToken: "plain-token",
 	}
-	for k, v := range want {
-		if values[k] != v {
-			t.Errorf("values[%q] = %q, want %q", k, values[k], v)
-		}
+	if got != want {
+		t.Errorf("got %+v, want %+v", got, want)
 	}
 }
 
 func TestParseConfigFileMissing(t *testing.T) {
-	values, err := parseConfigFile(filepath.Join(t.TempDir(), "does-not-exist"))
+	got, err := parseConfigFile(filepath.Join(t.TempDir(), "does-not-exist"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(values) != 0 {
-		t.Fatalf("got %v, want empty map", values)
+	if got != (configFile{}) {
+		t.Fatalf("got %+v, want zero value", got)
 	}
 }
 
 func TestLoadConfigEnvOverridesFile(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "config")
-	content := `
-HOMESERVER="https://file.example.org"
-ROOM_ID="!file:example.org"
-ACCESS_TOKEN="file-token"
-`
+	path := filepath.Join(dir, "config.json")
+	content := `{
+  "homeserver": "https://file.example.org",
+  "room_id": "!file:example.org",
+  "access_token": "file-token"
+}`
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatalf("writing config file: %v", err)
 	}

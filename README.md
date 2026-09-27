@@ -23,23 +23,25 @@ To use `matrix-org-notify`, you need:
 
 ### Configuration File
 
-Create a configuration file in your user config directory:
+Create a JSON configuration file in your user config directory:
 
-- **Linux / macOS**: `~/.config/matrix-org-notify/config`
-- **Windows**: `%APPDATA%\matrix-org-notify\config`
+- **Linux / macOS**: `~/.config/matrix-org-notify/config.json`
+- **Windows**: `%APPDATA%\matrix-org-notify\config.json`
 
 Example content:
 
-```bash
-HOMESERVER="https://matrix-client.matrix.org"
-ROOM_ID="!your_room_id:matrix.org"
-ACCESS_TOKEN="syt_your_access_token_here"
+```json
+{
+  "homeserver": "https://matrix-client.matrix.org",
+  "room_id": "!your_room_id:matrix.org",
+  "access_token": "syt_your_access_token_here"
+}
 ```
 
 Restrict permissions on the file to prevent unauthorized access:
 
 ```bash
-chmod 600 ~/.config/matrix-org-notify/config
+chmod 600 ~/.config/matrix-org-notify/config.json
 ```
 
 ### Environment Variables (Optional)
